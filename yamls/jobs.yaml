@@ -1,0 +1,121 @@
+################################################################################
+# Example card in YAML
+# Contact: Raymond Tsang
+################################################################################
+
+RunTitle: TestPref  # ID for this set of simulations. Used as prefix for generated files.
+
+# Select the parts of the software to be run
+RunDetectorSimulation: 1           # 1=yes, 0=no to run the Geant4 simulation
+RunChargeSimulation:   0           # 1=yes, 0=no to run the charge simulation (Not implemented)
+RunClustering:         0           # 1=yes, 0=no to run the clustering (Non existent)
+RunReconstruction:     0           # 1=yes, 0=no to run the reconstruction (Non existent)
+RunFastlight:          0           # 1=yes, 0=no to run the fast light simulation (requires lightmap)
+
+# Configurations for the platform on which the software is run
+System: 
+  # Cluster farm choices: local, LLNL, SLAC, OSG. (For docker, use "local")
+  Farm:            local 
+  BatchFarmCall:   "" 
+  FullnEXOSimPath: "python ./RunDetSim.py"
+  PythonCommand:   python
+  #SetupFile:       /opt/nexo/software/setup.sh
+
+  # Working directory where macros and bash scripts are stored
+  FileTopDir: ./output
+  JobsFullOutputPath:     "[FileTopDir]/jobs"    # output directory of job scripts
+  G4FullOutputPath:       "[FileTopDir]/g4"      # output directory of G4 macros and files
+  ClusterFullOutputPath:  "[FileTopDir]/cluster" # output directory of clustered files
+  ReconFullOutputPath:    "[FileTopDir]/recon"   # output directory of reconstructed files
+  #FileNamePattern:        "[OutputNamePrefix]_[Isotope]_[Location]_seed[Seed]"
+  FileNamePattern:        "[OutputNamePrefix]_[Geometry]_[Isotope]_[Location]_seed[Seed]"
+
+  JobHeader: |
+    #!/bin/sh
+    uname -a
+    grep "\(model name\|bogomips\)" /proc/cpuinfo
+    free
+    echo
+
+# Settings for detector simulation in Geant4
+DetectorSimulation:
+
+  # Name of the output root tree
+  G4TreeName: nEXOevents
+
+  # Example of varying TPC dimensions
+  # Note: There can be multiple entries in "LinkDimensions". However the lists of linked dimensions must not overlap.
+  # Remember to include "[Geometry]" in the FileNamePattern line under "System".
+  Geometries:
+    LinkDimensions: 
+      - ["Radius", "Height"]                  # Radii and heights change in tandem. Not limited to two variables. 
+                                              # Also notice this is a list of lists.
+    Radius:         ["628.5","638.5","648.5"] # Radii of some part (same length as the list of heights)
+    Height:         ["1297","1277","1257"]    # Heights of some part (same length as the list of Radii)
+
+  # Macro Template
+  MacroModel: |
+    /control/verbose 1
+    /nEXO/det/checkOverlap false
+    
+    ## Use Baseline 2017
+    /control/execute ./yamls/Baseline2017.mac
+    
+    ## Example of varying TPC dimensions
+    #/nEXO/TPCInternals/SiPMOption 1
+    #/nEXO/TPCInternals/AnodeOption 1
+    #/nEXO/TPCVessel/AllenCylFlatEnd/InnerRadius [Radius] mm
+    #/nEXO/TPCVessel/AllenCylFlatEnd/InnerLength [Height] mm
+    #/nEXO/TPCInternals/TPCRadius [Radius] mm
+    #/nEXO/TPCInternals/TPCHeight [Height] mm
+    
+    # Turn on scintillation simulation, if desired:
+    #/EXOPhysicsList/enableLight true
+    /run/initialize
+    # Important setting for NEST accuracy, but will dramatically slow down normal reconstruction:
+    #/EXOPhysicsList/cutValueInsideTPC 500 nm
+    # Turn on tracking of optical photons:
+    #/analysis/setPropagateOP 1
+
+  # Event Generation
+  LocationType: ScriptConfinement
+  Parents:
+    U238: 
+      - ["Pa234","1"]
+      - ["Ra226","1"]
+      - ["Pb214","1"]
+      - ["Bi214","1"]
+      - ["Bi210","1"]
+    Th232: 
+      - ["Ac228","1"]
+      - ["Ra224","1"]
+      - ["Pb212","1"]
+      - ["Bi212","1"]
+      - ["Tl208","0.36"]
+    Rn222: 
+      - ["Bi214","1"]
+    bb2nSplit: 
+      - ["bb2nBulk","0.99997835"] 
+      - ["bb2nTail","2.165E-05"]
+  
+  # Volumes in which primary particles are generated
+  # The three entries in the arrays are: total number of events, number of jobs, and starting seed number.
+  Locations: 
+    /nEXO/TPCVessel: {"U238":[1000,10,1], "Th232":[1000,10,1]}  # Fully contracted
+    /nEXO/TPCInternals/SupportRodsAndSpacers: {"U238":[1000,10,1], "Th232":[1000,10,1]}  # Fully contracted
+    /nEXO/TPCInternals/FieldRing:  # Fully expanded
+      U238: 
+        - 1000 
+        - 10 
+        - 1
+      Th232:
+        - 1000 
+        - 10 
+        - 1
+
+# Other settings (work in progress) 
+ChargeSimulation:
+FastLightSimulation:
+Reconstruction:
+
+
