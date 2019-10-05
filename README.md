@@ -12,6 +12,7 @@ https://docs.google.com/spreadsheets/d/1_vZRHD24bRcF0OgAs-3pSoa7qDtm96nFlU6Rf0e8
 ## SubmitSLAC.py arguments
 
 ```
+helpstr = """
 Useage:
     Download CVS file that defines jobs.
     Run this script with the first argument the CSV file.
@@ -21,5 +22,9 @@ Useage:
     You can add the following arguments as well:
        submit - required to submit jobs to bsub
        verbose - Prints out stuff to check stuff
+       check  - Check the sims dir for missing jobs and quit
+       fix  - With "check" will submit missing jobs to bsub and quit
+"""
+
 ```
 
