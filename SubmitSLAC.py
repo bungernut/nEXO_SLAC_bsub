@@ -15,8 +15,10 @@ Useage:
        verbose - Prints out stuff to check stuff
 """
 
+os.environ['MCSCRIPTSDIR'] = os.environ['PWD']
 mac_location = os.environ['PWD'] + '/macros'
 outdir = os.environ['PWD'] + '/sims'
+
 
 sims = []  # MAC_NAME, jobs, sims, wall_time
 

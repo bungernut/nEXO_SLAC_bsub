@@ -31,14 +31,25 @@ cd ${HOME}
 
 # Runs the stuff
 echo "(>**)> Running"
-cp /nfs/slac/g/exo/bmong/nEXO_MC/RunDetSim.py ${HOME}
-cp -r /nfs/slac/g/exo/bmong/nEXO_MC/yamls ${HOME}
+cp ${MCSCRIPTSDIR}/*.py ${HOME}
+cp -r ${MCSCRIPTSDIR}/yamls ${HOME}
 
 python ./RunDetSim.py \
     --run ${MCMAC} \
     --output ${MCNAME}_${MCSEED}.root \
     --seed ${MCSEED} \
     --evtmax ${MCNUMSIMS}
+
+python ./Clustering_offline.py \
+    -c yamls/Baseline2017_offline.card \
+    -i ${MCNAME}_${MCSEED}.root \
+    -o ${MCNAME}_C_${MCSEED}.root \
+
+python ./Reconstruction_offline.py \
+    -c yamls/Baseline2017_offline.card \
+    -i ${MCNAME}_C_${MCSEED}.root \
+    -o ${MCNAME}_CR_${MCSEED}.root \
+    -s ${MCSEED}
 
 # COPY files to MCOUTDIR
 echo "(>**)> Copying Files"
