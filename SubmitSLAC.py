@@ -48,7 +48,7 @@ if 'verbose' in sys.argv:
 # Check that all the macros exist
 missing_mac = False
 for sim in sims:
-    if not os.path.isfile(mac_location + sim[0]):
+    if not os.path.isfile(mac_location + '/' + sim[0]):
         missing_mac = True
         print "Macro Missing: ", sim[0]
 if missing_mac == True:
