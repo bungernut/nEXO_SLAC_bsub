@@ -29,22 +29,25 @@ mkdir -p  $scratch_dir
 export HOME=$scratch_dir
 cd ${HOME}
 
-# Runs the stuff
-echo "(>**)> Running"
+echo "(>**)> Copying scripts to scratch"
 cp ${MCSCRIPTSDIR}/*.py ${HOME}
 cp -r ${MCSCRIPTSDIR}/yamls ${HOME}
 
+# Runs the stuff
+echo "(>**)> Running G4"
 python ./RunDetSim.py \
     --run ${MCMAC} \
     --output ${MCNAME}_${MCSEED}.root \
     --seed ${MCSEED} \
     --evtmax ${MCNUMSIMS}
 
+echo "(>**)> Running Clustering"
 python ./Clustering_offline.py \
     -c yamls/Baseline2017_offline.card \
     -i ${MCNAME}_${MCSEED}.root \
     -o ${MCNAME}_C_${MCSEED}.root \
 
+echo "(>**)> Running Reconstruction"
 python ./Reconstruction_offline.py \
     -c yamls/Baseline2017_offline.card \
     -i ${MCNAME}_C_${MCSEED}.root \
