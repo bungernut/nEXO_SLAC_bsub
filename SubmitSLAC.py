@@ -35,17 +35,36 @@ with open(sys.argv[1], 'r') as csvfile:
                 print row
             continue
         if row[1] == 'SLAC':
+            #            MAC   , #Jobs     , #Events   , WallTime
             sims.append((row[0],int(row[2]),int(row[3]),int(row[4])))
 
 
+# Print the jobs in CSV file if verbose=True
 if 'verbose' in sys.argv:
-    print "Here are the sims"
+    print "Here are the sims I read from the CSV file"
     print sims
 
 
-# TODO check for cards and NEXOTOP?
+# Check that all the macros exist
+missing_mac = False
+for sim in sims:
+    if not os.path.isfile(mac_location + sim[0]):
+        missing_mac = True
+        print "Macro Missing: ", sim[0]
+if missing_mac == True:
+    print "Missing Macros, quitting"
+    sys.exit()
 
 
+# Check the environment is setup to run nEXO_Offline
+if 'NEXOTOP' not in os.environ.keys():
+    print "I dont see $NEXOTOP in your environment variables"
+    print "Check that you are properly setup"
+    sys.exit()
+
+
+# Here we set the environment variables for the simulations 
+# And submit them it the argument `submit` was provided
 for sim in sims:
     os.environ['MCNAME'] = sim[0].split('.')[0]
     os.environ['MCMAC'] = mac_location + '/' + sim[0]
