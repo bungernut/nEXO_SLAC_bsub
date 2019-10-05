@@ -20,12 +20,20 @@ outdir = os.environ['PWD'] + '/sims'
 
 sims = []  # MAC_NAME, jobs, sims, wall_time
 
+if 'verbose' in sys.argv:
+    print "Verbose"
+    print sys.argv
 
-with open(sys.argv[1]) as csvfile:
-    jobreader = csv.reader(csvfile)
+with open(sys.argv[1], 'r') as csvfile:
+    jobreader = csv.reader(csvfile, delimiter=',')
     for row in jobreader:
-        if row[2] == 'SLAC':
-            sims.append((row[0],row[2],row[3],row[4]))
+        print row
+        if row[0][0] == '#':
+            if 'verbose' in sys.argv:
+                print row
+            continue
+        if row[1] == 'SLAC':
+            sims.append((row[0],int(row[2]),int(row[3]),int(row[4])))
 
 
 if 'verbose' in sys.argv:
@@ -37,13 +45,13 @@ if 'verbose' in sys.argv:
 
 
 for sim in sims:
-    os.environ['MCNAME'] = sim[2].split('.')[0]
-    os.environ['MCMAC'] = mac_location + '/' + sim[2]
+    os.environ['MCNAME'] = sim[0].split('.')[0]
+    os.environ['MCMAC'] = mac_location + '/' + sim[0]
     os.environ['MCOUTDIR'] = outdir
-    os.environ['MCNUMSIMS'] = str(sim[1])
-    for i in range(sim[0]):
+    os.environ['MCNUMSIMS'] = str(sim[2])
+    for i in range(sim[1]):
         print os.environ['MCNAME'] + ' :: ' + str(i)
-        os.environ['MCSEED'] = str(i)
+        os.environ['MCSEED'] = str(i+1)
         if 'submit' in sys.argv:
             subprocess.call(["bsub", "-R", "centos7",\
                     "-W", str(sim[3]),\

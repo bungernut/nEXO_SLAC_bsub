@@ -1,0 +1,5 @@
+#MAC,LOCATION,# Jobs,# Sims,Wall Time / que
+SiPM_Si.mac,SLAC,3,1000,110
+SiPM_SiO2.mac,SLAC,3,1000,110
+Sapphire_Pb210.mac,SLAC,3,1000,110
+HFE_pb210.mac,SLAC,3,1000,110
